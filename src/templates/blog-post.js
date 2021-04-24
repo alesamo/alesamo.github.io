@@ -1,9 +1,9 @@
 import * as React from "react"
 import { Link, graphql } from "gatsby"
 
-import Bio from "../components/bio"
 import Layout from "../components/layout"
 import SEO from "../components/seo"
+import Breadcrumbs from "../components/breadcrumbs"
 
 const BlogPostTemplate = ({ data, location }) => {
   const post = data.markdownRemark
@@ -16,50 +16,60 @@ const BlogPostTemplate = ({ data, location }) => {
         title={post.frontmatter.title}
         description={post.frontmatter.description || post.excerpt}
       />
-      <article
-        className="blog-post"
-        itemScope
-        itemType="http://schema.org/Article"
-      >
-        <header>
-          <h1 itemProp="headline">{post.frontmatter.title}</h1>
-          <p>{post.frontmatter.date}</p>
-        </header>
-        <section
-          dangerouslySetInnerHTML={{ __html: post.html }}
-          itemProp="articleBody"
-        />
-        <hr />
-        <footer>
-          <Bio />
-        </footer>
-      </article>
-      <nav className="blog-post-nav">
-        <ul
-          style={{
-            display: `flex`,
-            flexWrap: `wrap`,
-            justifyContent: `space-between`,
-            listStyle: `none`,
-            padding: 0,
-          }}
-        >
-          <li>
-            {previous && (
-              <Link to={previous.fields.slug} rel="prev">
-                ← {previous.frontmatter.title}
-              </Link>
+
+      <Breadcrumbs title={post.frontmatter.title}/>
+
+      <article id="portfolio-details" className="portfolio-details" data-aos="fade-up" data-aos-delay="100" itemScope itemType="http://schema.org/Article">
+      <div className="container">
+
+        <div className="portfolio-details-container">
+
+          <div className="owl-carousel portfolio-details-carousel">
+            {post.frontmatter.images.map((image) =>
+              <img src={"/img/projects/" + image} className="img-fluid" alt=""/>
             )}
-          </li>
-          <li>
-            {next && (
-              <Link to={next.fields.slug} rel="next">
-                {next.frontmatter.title} →
-              </Link>
-            )}
-          </li>
-        </ul>
+          </div>
+
+          <div className="portfolio-info col-12 col-lg-4 mb-5">
+            <ul className="m-0">
+              <li><strong>Category</strong>: <span id="post-category">{post.frontmatter.category}</span></li>
+              {post.frontmatter.description ? <li><strong>Description</strong>: {post.frontmatter.description}</li> : null}
+            </ul>
+          </div>
+
+        </div>
+
+        <div className="portfolio-description mb-4" dangerouslySetInnerHTML={{ __html: post.html }} itemProp="articleBody">
+        </div>
+
+      </div>
+    </article>
+
+      <nav className="blog-post-nav container my-4">
+        <hr className="mb-4"/>
+        <div className="row">
+          {previous && (
+            <Link to={previous.fields.slug} rel="prev" className="col-12 col-lg-6 mb-2 mb-lg-0">
+              <img src={previous.frontmatter.preview} />
+              <div style={{textAlign: "right"}}>
+                <span>← Previous</span>
+                <strong>{previous.frontmatter.title}</strong>
+              </div>
+            </Link>
+          )}
+          {next && (
+            <Link to={next.fields.slug} rel="next" className={"col-12 col-lg-6" + (previous ? "" : " offset-lg-6")}>
+              <div>
+                <span>Next →</span>
+                <strong>{next.frontmatter.title}</strong>
+              </div>
+              <img src={next.frontmatter.preview} />
+            </Link>
+          )}
+        </div>
       </nav>
+
+
     </Layout>
   )
 }
@@ -83,8 +93,10 @@ export const pageQuery = graphql`
       html
       frontmatter {
         title
-        date(formatString: "MMMM DD, YYYY")
+        date(formatString: "DD/MM/YYYY")
         description
+        category
+        images
       }
     }
     previous: markdownRemark(id: { eq: $previousPostId }) {
@@ -93,6 +105,7 @@ export const pageQuery = graphql`
       }
       frontmatter {
         title
+        preview
       }
     }
     next: markdownRemark(id: { eq: $nextPostId }) {
@@ -101,6 +114,7 @@ export const pageQuery = graphql`
       }
       frontmatter {
         title
+        preview
       }
     }
   }
